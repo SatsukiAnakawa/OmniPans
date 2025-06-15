@@ -1,0 +1,31 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="Color.Window.Background">#FF171717</Color>
+    <Color x:Key="Color.Flyout.Background">#FF2E2E2E</Color>
+    <Color x:Key="Color.DeviceView.Background">#FF2B2B2B</Color>
+    <Color x:Key="Color.ContextMenu.Background">#FF2B2B2B</Color>
+    <Color x:Key="Color.MenuItem.Highlight">#FF404040</Color>
+    <Color x:Key="Color.Flyout.Border">#FF4A4A4A</Color>
+    <Color x:Key="Color.DeviceView.ItemSeparator">#FF404040</Color>
+    <Color x:Key="Color.Text.Primary">#FFFFFFFF</Color>
+    <Color x:Key="Color.Text.Secondary">#FF808080</Color>
+    <Color x:Key="Color.Text.DeviceName">#FFFFFFFF</Color>
+    <Color x:Key="Color.Text.DeviceControlLabel">#FFFFFFFF</Color>
+    <Color x:Key="Color.Effect.Shadow">#AA000000</Color>
+
+    <SolidColorBrush x:Key="Brush.Window.Background" Color="{StaticResource Color.Window.Background}"/>
+    <SolidColorBrush x:Key="Brush.Flyout.Background" Color="{StaticResource Color.Flyout.Background}"/>
+    <SolidColorBrush x:Key="Brush.DeviceView.Background" Color="{StaticResource Color.DeviceView.Background}"/>
+    <SolidColorBrush x:Key="Brush.ContextMenu.Background" Color="{StaticResource Color.ContextMenu.Background}"/>
+    <SolidColorBrush x:Key="Brush.MenuItem.Highlight" Color="{StaticResource Color.MenuItem.Highlight}"/>
+    <SolidColorBrush x:Key="Brush.Flyout.Border" Color="{StaticResource Color.Flyout.Border}"/>
+    <SolidColorBrush x:Key="Brush.DeviceView.ItemSeparator" Color="{StaticResource Color.DeviceView.ItemSeparator}"/>
+    <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Text.Primary}"/>
+    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Text.Secondary}"/>
+    <SolidColorBrush x:Key="Brush.Text.DeviceName" Color="{StaticResource Color.Text.DeviceName}"/>
+    <SolidColorBrush x:Key="Brush.Text.DeviceControlLabel" Color="{StaticResource Color.Text.DeviceControlLabel}"/>
+
+    <SolidColorBrush x:Key="InteractiveSlider.DeviceView.TrackValueBrush" Color="#FF3F3F3F"/>
+
+</ResourceDictionary>

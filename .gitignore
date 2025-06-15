@@ -1,0 +1,46 @@
+# Visual Studio generated
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+Log/
+[Ll]og/
+[Ll]ogs/
+
+# Publish results
+*.[Pp]ublish/
+*.[Pp]ublish.win-x64/
+*.[Pp]ublish.win-x86/
+*.[Pp]ublish.win-arm64/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+/packages
+
+# User-specific files
+*.DotSettings.user
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Mac/Linux files
+.DS_Store
+Thumbs.db

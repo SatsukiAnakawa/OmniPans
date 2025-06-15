@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="OmniPans.Presentation.Views.DeviceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:models="clr-namespace:OmniPans.Core.Models"
+             xmlns:controls="clr-namespace:OmniPans.Presentation.Controls"
+             xmlns:viewmodels="clr-namespace:OmniPans.Presentation.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodels:DeviceViewModel, IsDesignTimeCreatable=False}"
+             Grid.IsSharedSizeScope="True"
+             HorizontalAlignment="Stretch">
+
+    <UserControl.Resources>
+        <controls:PanSliderCalculator x:Key="PanCalculatorInstance" />
+
+        <Style x:Key="BaseInteractiveSliderStyle" TargetType="controls:InteractiveSlider" BasedOn="{StaticResource {x:Type controls:InteractiveSlider}}">
+            <Setter Property="SliderContainerWidth" Value="230" />
+            <Setter Property="ValueTextWidth" Value="55" />
+            <Setter Property="TrackValueBrush" Value="{StaticResource InteractiveSlider.DeviceView.TrackValueBrush}" />
+            <Setter Property="KeyboardStep" Value="1.0" />
+            <Setter Property="MouseWheelStep" Value="2.0" />
+        </Style>
+
+        <Style x:Key="VolumeSliderStyle" TargetType="controls:InteractiveSlider" BasedOn="{StaticResource BaseInteractiveSliderStyle}">
+            <Setter Property="ValueTextFontSize" Value="22" />
+            <Setter Property="IsDoubleClickToResetEnabled" Value="False" />
+            <Setter Property="ResetValue" Value="0"/>
+        </Style>
+
+        <Style x:Key="PanSliderStyle" TargetType="controls:InteractiveSlider" BasedOn="{StaticResource BaseInteractiveSliderStyle}">
+            <Setter Property="ValueTextFontSize" Value="18" />
+            <Setter Property="Calculator" Value="{StaticResource PanCalculatorInstance}" />
+            <Setter Property="IsDoubleClickToResetEnabled" Value="True" />
+            <Setter Property="ResetValue" Value="{x:Static models:DeviceSettings.DefaultPan}" />
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource Brush.DeviceView.Background}" CornerRadius="0" Padding="0,8,0,0" Margin="0,0,0,0" HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+            <Border Padding="5" Margin="0,0,0,5">
+                <TextBlock Style="{StaticResource DeviceNameTextStyle}" Margin="10,0,0,0"
+                           Text="{Binding FriendlyName}">
+                    <TextBlock.ContextMenu>
+                        <ContextMenu Style="{StaticResource ContextMenuBaseStyle}">
+                            <MenuItem Header="このデバイスを非表示にする"
+                                      Command="{Binding HideDeviceCommand}"/>
+                        </ContextMenu>
+                    </TextBlock.ContextMenu>
+                </TextBlock>
+            </Border>
+            <Border Padding="5">
+                <Grid Margin="10,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="DeviceControlLabelColumn"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="音量" Style="{StaticResource DeviceControlLabelTextStyle}" VerticalAlignment="Center"/>
+                    <controls:InteractiveSlider Grid.Column="1"
+                                                Style="{StaticResource VolumeSliderStyle}"
+                                                Value="{Binding Volume, Mode=TwoWay}"
+                                                Minimum="{x:Static models:DeviceSettings.MinVolume}"
+                                                Maximum="{x:Static models:DeviceSettings.MaxVolume}"/>
+                </Grid>
+            </Border>
+            <Border Margin="0,5,0,0" Padding="5,10,5,10">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource Brush.DeviceView.Background}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsEnabled, ElementName=PanSlider}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource Brush.Window.Background}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <Grid Margin="10,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="DeviceControlLabelColumn"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="パン" Style="{StaticResource DeviceControlLabelTextStyle}" VerticalAlignment="Center"/>
+                    <controls:InteractiveSlider x:Name="PanSlider" Grid.Column="1"
+                                                Style="{StaticResource PanSliderStyle}"
+                                                Value="{Binding Pan, Mode=TwoWay}"
+                                                Minimum="{x:Static models:DeviceSettings.MinPan}"
+                                                Maximum="{x:Static models:DeviceSettings.MaxPan}"
+                                                IsEnabled="{Binding IsPanControlAvailable}"/>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

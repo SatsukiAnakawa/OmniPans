@@ -1,0 +1,40 @@
+# このファイルがこのプロジェクトのルート設定ファイルであることを示します
+root = true
+
+# 全てのファイル形式に適用されるルール
+[*]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# C#ファイル (.cs) にのみ適用されるルール
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# usingディレクティブの配置ルール
+csharp_using_directive_placement = outside_namespace:suggestion
+
+# .NETのコーディングスタイルに関するルール
+# this. を付けるかどうかの設定 (付けないことを推奨)
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# privateなフィールド名の前にアンダースコアを付けることを推奨
+dotnet_naming_rule.private_members_with_underscore.symbols = private_fields
+dotnet_naming_rule.private_members_with_underscore.style = underscore_prefix
+dotnet_naming_rule.private_members_with_underscore.severity = suggestion
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.underscore_prefix.required_prefix = _
+dotnet_naming_style.underscore_prefix.capitalization = camel_case
+
+# var キーワードを使うかどうかの設定 (型が明らかな場合はvarを推奨)
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion

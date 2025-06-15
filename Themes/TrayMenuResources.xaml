@@ -1,0 +1,55 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:viewmodels="clr-namespace:OmniPans.Presentation.ViewModels"
+                    xmlns:views="clr-namespace:OmniPans.Presentation.Views"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="d">
+
+    <DataTemplate x:Key="HeaderMenuItemTemplate" DataType="{x:Type viewmodels:HeaderMenuItemViewModel}">
+        <MenuItem Header="{Binding Header}" IsEnabled="False"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SeparatorMenuItemTemplate" DataType="{x:Type viewmodels:SeparatorMenuItemViewModel}">
+        <Separator/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DeviceMenuItemTemplate" DataType="{x:Type viewmodels:HiddenDeviceMenuItemViewModel}">
+        <MenuItem Header="{Binding Header}"
+                  Command="{Binding DataContext.UnhideDeviceCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                  CommandParameter="{Binding DeviceId}"/>
+    </DataTemplate>
+
+    <views:MenuItemTemplateSelector x:Key="MenuItemTemplateSelectorInstance"
+                                    HeaderTemplate="{StaticResource HeaderMenuItemTemplate}"
+                                    SeparatorTemplate="{StaticResource SeparatorMenuItemTemplate}"
+                                    DeviceTemplate="{StaticResource DeviceMenuItemTemplate}"/>
+
+    <ContextMenu x:Key="TrayContextMenu" x:Shared="False" Style="{StaticResource ContextMenuBaseStyle}"
+                 d:DataContext="{d:DesignInstance Type=viewmodels:TrayMenuViewModel}">
+
+        <ContextMenu.Resources>
+            <Style TargetType="Separator">
+                <Setter Property="Margin" Value="0,4,0,4"/>
+            </Style>
+        </ContextMenu.Resources>
+
+        <MenuItem Name="StartupMenuItem"
+                  Header="スタートアップに追加する"
+                  IsCheckable="True"
+                  IsChecked="{Binding IsStartupEnabled}"
+                  Command="{Binding ToggleStartupCommand}"
+                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
+
+        <MenuItem Name="HiddenDevicesParentMenuItem"
+                  Header="非表示のデバイス"
+                  ItemsSource="{Binding HiddenDeviceMenuItems}"
+                  ItemTemplateSelector="{StaticResource MenuItemTemplateSelectorInstance}"
+                  Visibility="{Binding HasHiddenDeviceItems, Converter={StaticResource BooleanToVisibilityConverterInstance}}"
+                  Tag="KeepMargin"/>
+
+        <Separator/>
+        <MenuItem Header="終了" Command="{Binding ExitApplicationCommand}" Tag="KeepMargin"/>
+    </ContextMenu>
+
+</ResourceDictionary>
