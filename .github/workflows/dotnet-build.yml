@@ -23,4 +23,4 @@ jobs:
       run: dotnet restore OmniPans.csproj
 
     - name: Build
-      run: dotnet build OmniPans.csproj --configuration Release-CI --no-restore
+      run: dotnet publish OmniPans.csproj --configuration Release-CI --no-restore -p:PublishSingleFile=true --self-contained false
