@@ -20,7 +20,7 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore OmniPans.csproj
+      run: dotnet restore OmniPans.csproj --runtime win-x64
 
     - name: Build
       run: dotnet publish OmniPans.csproj --configuration Release-CI --no-restore -p:PublishSingleFile=true --self-contained false
