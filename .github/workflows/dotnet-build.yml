@@ -20,7 +20,7 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore OmniPans/OmniPans.csproj
+      run: dotnet restore OmniPans.csproj
 
     - name: Build
-      run: dotnet build OmniPans/OmniPans.csproj --configuration Release-CI --no-restore
+      run: dotnet build OmniPans.csproj --configuration Release-CI --no-restore
