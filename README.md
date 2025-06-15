@@ -2,7 +2,7 @@
 
 **Windowsの全オーディオデバイスの音量とパン（左右バランス）を、一つの場所から手軽に調整できるユーティリティアプリです。**
 
-![Image](https://github.com/user-attachments/assets/3f26cbb6-79f9-478a-8ecd-09d044f131f4)
+![Image](https://github.com/user-attachments/assets/97aca3f7-cced-4467-8cc1-293dfe33fa8f)
 
 ! ## 主な機能
 
