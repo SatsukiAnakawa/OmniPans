@@ -1,10 +1,11 @@
-﻿// Application/App.xaml.cs
+// Application/App.xaml.cs
 // アプリケーションのエントリーポイント。ライフサイクルイベントとグローバルな例外処理を管理します。
 namespace OmniPans;
 public partial class App : System.Windows.Application
 {
     #region フィールド・プロパティ
 
+    private System.Threading.Mutex? _mutex;
     private Bootstrapper? _bootstrapper;
 
     internal Microsoft.Extensions.Logging.ILogger? AppLogger { get; set; }
@@ -17,6 +18,22 @@ public partial class App : System.Windows.Application
     // アプリケーションの起動時に実行される処理です。
     protected override void OnStartup(StartupEventArgs e)
     {
+        _mutex = new System.Threading.Mutex(true, "OmniPans-SatsukiAnakawa-Mutex", out bool createdNew);
+
+        if (!createdNew)
+        {
+            MessageBox.Show(
+                "OmniPansはすでに起動しています。",
+                "多重起動防止",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            _mutex?.Dispose();
+            _mutex = null;
+            Shutdown();
+            return;
+        }
+
         this.DispatcherUnhandledException += App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
@@ -42,6 +59,10 @@ public partial class App : System.Windows.Application
     // アプリケーションの終了時に実行される処理です。
     protected override void OnExit(ExitEventArgs e)
     {
+        _mutex?.ReleaseMutex();
+        _mutex?.Dispose();
+        _mutex = null;
+
         AppLogger?.LogInformation("アプリケーション終了処理開始...");
         this.DispatcherUnhandledException -= App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;

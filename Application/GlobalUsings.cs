@@ -1,4 +1,4 @@
-﻿// Application/GlobalUsings.cs
+// Application/GlobalUsings.cs
 // プロジェクト全体で使用する名前空間をグローバルに定義します。
 
 #region NuGet
@@ -80,3 +80,7 @@ global using MouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
 global using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 global using MouseWheelEventArgs = System.Windows.Input.MouseWheelEventArgs;
 #endregion
+
+global using Serilog.Settings.Configuration;
+global using Serilog.Sinks.Debug;
+global using Serilog.Sinks.File;

@@ -1,4 +1,4 @@
-﻿// Application/Bootstrapper.cs
+// Application/Bootstrapper.cs
 // アプリケーションの起動プロセス、設定読み込み、DIコンテナの構築を担当します。
 namespace OmniPans.Application;
 public class Bootstrapper : IDisposable
