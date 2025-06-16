@@ -21,9 +21,19 @@ public class Bootstrapper : IDisposable
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
+
+        string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppConstants.AppName);
+        string logFilePath = Path.Combine(appDataPath, "logs", "omnipans_log_.txt");
+
+        var readerOptions = new ConfigurationReaderOptions();
         Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(Configuration)
+            .ReadFrom.Configuration(Configuration, readerOptions)
+            .WriteTo.File(logFilePath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
             .CreateLogger();
+
         Log.Information("OmniPans アプリケーション起動処理開始...");
         System.Windows.Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -35,7 +45,6 @@ public class Bootstrapper : IDisposable
         hostWindowService.CreateAndSetMainWindow();
 
         InitializeGlobalServices();
-
         var appInitializer = _serviceProvider.GetRequiredService<IApplicationInitializer>();
         appInitializer.Initialize();
         Log.Information("OmniPans アプリケーション起動成功。");
@@ -53,19 +62,27 @@ public class Bootstrapper : IDisposable
             throw new InvalidOperationException("Configuration is not initialized.");
         }
 
-        // BehaviorConfigをDIコンテナに登録
         var behaviorConfig = new Core.Models.Configuration.BehaviorConfig();
         Configuration.GetSection("Behavior").Bind(behaviorConfig);
         services.AddSingleton(behaviorConfig);
 
-        // ISystemClockをここで最初に登録する
         services.AddSingleton<Core.Services.Common.ISystemClock, Infrastructure.Services.Common.SystemClock>();
 
         services.AddSingleton(Configuration);
         services.AddAppLoggingServices();
 
-        // 依存関係の土台から順に登録するように順番を整理
-        services.AddAppUserSettingsServices(AppConstants.UserSettingsFileName);
+        string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppConstants.AppName);
+        string userSettingsPath = Path.Combine(appDataPath, AppConstants.UserSettingsFileName);
+        try
+        {
+            Directory.CreateDirectory(appDataPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "AppDataフォルダの作成に失敗しました。");
+        }
+
+        services.AddAppUserSettingsServices(userSettingsPath);
         services.AddAppApplicationServices();
         services.AddAppAudioServices();
     }
