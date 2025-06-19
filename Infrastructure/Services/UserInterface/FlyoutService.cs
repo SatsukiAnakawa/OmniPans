@@ -1,7 +1,6 @@
-﻿// Infrastructure/Services/UserInterface/FlyoutService.cs
+// Infrastructure/Services/UserInterface/FlyoutService.cs
 // UIのフライアウトウィンドウの表示・非表示とライフサイクルを管理します。
 namespace OmniPans.Infrastructure.Services.UserInterface;
-
 /// <summary>
 /// UIのフライアウトウィンドウの表示・非表示とライフサイクルを管理する実装クラスです。
 /// </summary>
@@ -42,6 +41,9 @@ public class FlyoutService(
         {
             var viewModel = flyoutViewModelFactory();
             _flyoutWindow = new FlyoutWindow { DataContext = viewModel };
+
+            _flyoutWindow.MaxHeight = SystemParameters.WorkArea.Height - 10;
+
             _flyoutWindow.Closed += OnFlyoutWindow_Closed;
             _flyoutWindow.SizeChanged += OnFlyoutWindow_SizeChanged;
 

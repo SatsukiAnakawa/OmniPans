@@ -1,6 +1,4 @@
-﻿// Infrastructure/Services/UserSettings/IOsNotificationHandlerFactory.cs
-// ユーザーのデバイス操作時刻をセッション内メモリで追跡します。
-
+// Core/Services/Factories/IOsNotificationHandlerFactory.cs
 // IOsNotificationHandlerのインスタンスを生成するファクトリーのインターフェースです。
 namespace OmniPans.Core.Services.Factories;
 

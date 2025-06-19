@@ -1,6 +1,7 @@
-﻿// Application/ServiceExtensions/ApplicationServicesExtensions.cs
+// Application/ServiceExtensions/ApplicationServicesExtensions.cs
 // アプリケーション層で利用する各種サービスをDIコンテナに登録します。
 namespace OmniPans.Application.ServiceExtensions;
+
 public static class ApplicationServicesExtensions
 {
     // アプリケーションのコアサービスをDIコンテナに登録します。
@@ -24,6 +25,7 @@ public static class ApplicationServicesExtensions
             new OsNotificationHandlerFactory(
                 provider.GetRequiredService<IDispatcherService>(),
                 provider.GetRequiredService<IUserInteractionTracker>(),
+                provider.GetRequiredService<IMessenger>(),
                 provider.GetRequiredService<Core.Models.Configuration.BehaviorConfig>()
             ));
         services.AddTransient<FlyoutViewModel>();

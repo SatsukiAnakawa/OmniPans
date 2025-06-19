@@ -1,7 +1,6 @@
-﻿// Core/Models/DeviceSettings.cs
+// Core/Models/DeviceSettings.cs
 // デバイスごとの設定を保持する不変のデータ構造です。
 namespace OmniPans.Core.Models;
-
 /// <summary>
 /// デバイスごとの設定を保持する不変のデータ構造です。
 /// </summary>
@@ -43,4 +42,8 @@ public record DeviceSettings
     /// ユーザーによってこのデバイスが非表示に設定されているかどうかを示す値を取得または初期化します。
     /// </summary>
     public bool IsUserHidden { get; init; } = false;
+    /// <summary>
+    /// パンがリセットされる直前の値を保持します。
+    /// </summary>
+    public double PanBeforeReset { get; init; } = DefaultPan;
 }

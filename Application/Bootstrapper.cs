@@ -1,6 +1,7 @@
 // Application/Bootstrapper.cs
 // アプリケーションの起動プロセス、設定読み込み、DIコンテナの構築を担当します。
 namespace OmniPans.Application;
+
 public class Bootstrapper : IDisposable
 {
     #region フィールド・プロパティ
@@ -21,7 +22,6 @@ public class Bootstrapper : IDisposable
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
-
         string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppConstants.AppName);
         string logFilePath = Path.Combine(appDataPath, "logs", "omnipans_log_.txt");
 
@@ -33,7 +33,6 @@ public class Bootstrapper : IDisposable
                 retainedFileCountLimit: 7,
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
             .CreateLogger();
-
         Log.Information("OmniPans アプリケーション起動処理開始...");
         System.Windows.Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -69,8 +68,8 @@ public class Bootstrapper : IDisposable
         services.AddSingleton<Core.Services.Common.ISystemClock, Infrastructure.Services.Common.SystemClock>();
 
         services.AddSingleton(Configuration);
+        services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         services.AddAppLoggingServices();
-
         string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppConstants.AppName);
         string userSettingsPath = Path.Combine(appDataPath, AppConstants.UserSettingsFileName);
         try

@@ -1,4 +1,4 @@
-﻿// Presentation/InteractionHandlers/OsNotificationHandler.cs
+// Presentation/InteractionHandlers/OsNotificationHandler.cs
 // OSからの音量変更通知をハンドリングし、UI更新のためのメッセージを送信します。
 namespace OmniPans.Presentation.InteractionHandlers;
 
@@ -8,6 +8,7 @@ public class OsNotificationHandler : IOsNotificationHandler
 
     private readonly string _deviceId;
     private readonly IUserInteractionTracker _userInteractionTracker;
+    private readonly IMessenger _messenger;
     private readonly IDisposable _subscription;
     private readonly Subject<float> _notificationSubject = new();
     private readonly int _gracePeriodMs;
@@ -17,23 +18,18 @@ public class OsNotificationHandler : IOsNotificationHandler
 
     #region コンストラクタ
 
-    /// <summary>
-    /// <see cref="OsNotificationHandler"/> クラスの新しいインスタンスを初期化します。
-    /// </summary>
-    /// <param name="deviceId">このハンドラーが対象とするデバイスのID。</param>
-    /// <param name="dispatcherService">UIスレッド操作サービス。</param>
-    /// <param name="userInteractionTracker">ユーザー操作追跡サービス。</param>
-    /// <param name="debounceTimeMs">デバウンス時間（ミリ秒）。</param>
-    /// <param name="gracePeriodMs">ユーザー操作の猶予期間（ミリ秒）。</param>
+    // OsNotificationHandler クラスの新しいインスタンスを初期化します。
     public OsNotificationHandler(
         string deviceId,
         IDispatcherService dispatcherService,
         IUserInteractionTracker userInteractionTracker,
+        IMessenger messenger,
         int debounceTimeMs,
         int gracePeriodMs)
     {
         _deviceId = deviceId;
         _userInteractionTracker = userInteractionTracker;
+        _messenger = messenger;
         _gracePeriodMs = gracePeriodMs;
 
         _subscription = _notificationSubject
@@ -46,10 +42,7 @@ public class OsNotificationHandler : IOsNotificationHandler
 
     #region Public Methods
 
-    /// <summary>
-    /// OSからの音量変更通知を処理します。ユーザー自身の操作直後の通知は無視します。
-    /// </summary>
-    /// <param name="newVolumeScalar">OSから通知された新しい音量のスカラー値 (0.0-1.0)。</param>
+    // OSからの音量変更通知を処理します。ユーザー自身の操作直後の通知は無視します。
     public void HandleOsVolumeNotification(float newVolumeScalar)
     {
         long elapsedMilliseconds = (long)(DateTime.UtcNow - _userInteractionTracker.GetLastUserInteractionTime(_deviceId)).TotalMilliseconds;
@@ -68,26 +61,21 @@ public class OsNotificationHandler : IOsNotificationHandler
     private void ProcessDebouncedNotification(float newVolumeScalar)
     {
         double newVolume = Math.Round(newVolumeScalar * 100.0);
-        WeakReferenceMessenger.Default.Send(new OsVolumeChangedMessage(_deviceId, newVolume));
+        _messenger.Send(new OsVolumeChangedMessage(_deviceId, newVolume));
     }
 
     #endregion
 
     #region IDisposable
 
-    /// <summary>
-    /// このオブジェクトが使用するリソースを解放します。
-    /// </summary>
+    // このオブジェクトが使用するリソースを解放します。
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// マネージドリソースおよびアンマネージドリソースを解放します。
-    /// </summary>
-    /// <param name="disposing">マネージドリソースを解放する場合は <c>true</c>、それ以外は <c>false</c>。</param>
+    // マネージドリソースおよびアンマネージドリソースを解放します。
     protected virtual void Dispose(bool disposing)
     {
         if (_isDisposed) return;

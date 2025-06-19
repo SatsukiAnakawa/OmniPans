@@ -1,4 +1,4 @@
-﻿// Core/AppConstants.cs
+// Core/AppConstants.cs
 // アプリケーション全体で共有される定数を定義します。
 namespace OmniPans.Core;
 
@@ -7,6 +7,7 @@ public static class AppConstants
     #region 全般
 
     public const string AppName = "OmniPans";
+    public const string MutexName = "OmniPans-SatsukiAnakawa-Mutex";
 #pragma warning disable S1075
     public const string AppIconUri = "pack://application:,,,/Application/app_icon.ico";
 #pragma warning restore S1075
@@ -29,6 +30,8 @@ public static class AppConstants
     #region UI関連
 
     public const string TrayContextMenuResourceKey = "TrayContextMenu";
+    public const double VolumeThresholdLow = 33;
+    public const double VolumeThresholdMid = 67;
 
     #endregion
 }

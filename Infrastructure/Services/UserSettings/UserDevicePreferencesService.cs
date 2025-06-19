@@ -1,4 +1,4 @@
-﻿// Infrastructure/Services/UserSettings/UserDevicePreferencesService.cs
+// Infrastructure/Services/UserSettings/UserDevicePreferencesService.cs
 // ユーザーによるデバイスごとの設定や表示設定を管理・永続化します。
 namespace OmniPans.Infrastructure.Services.UserSettings;
 
@@ -14,7 +14,6 @@ public class UserDevicePreferencesService : IUserDevicePreferencesService, IDisp
     private readonly IDeviceSettingsFactory _deviceSettingsFactory;
     private readonly ILogger<UserDevicePreferencesService> _logger;
     private readonly IAudioDeviceStateReader _audioDeviceStateReader;
-
     private readonly Subject<bool> _saveTrigger = new();
     private readonly IDisposable _saveSubscription;
     private bool _isDisposed;
@@ -26,20 +25,22 @@ public class UserDevicePreferencesService : IUserDevicePreferencesService, IDisp
     /// <param name="deviceSettingsFactory">新しいデバイスのデフォルト設定を生成するファクトリ。</param>
     /// <param name="logger">ロギングサービス。</param>
     /// <param name="audioDeviceStateReader">OSからデバイス状態を読み取るサービス。</param>
-    public UserDevicePreferencesService(
+    /// <param name="config">アプリケーションの振る舞いに関する設定。</param>
+    /// <param name="initialSettings">初期化に使用するデバイス設定のディクショナリ。</param>
+    internal UserDevicePreferencesService(
        IDeviceSettingsManager settingsManager,
        IDeviceSettingsFactory deviceSettingsFactory,
        ILogger<UserDevicePreferencesService> logger,
        IAudioDeviceStateReader audioDeviceStateReader,
-       Core.Models.Configuration.BehaviorConfig config)
+       Core.Models.Configuration.BehaviorConfig config,
+       Dictionary<string, DeviceSettings> initialSettings)
     {
         _settingsManager = settingsManager;
         _deviceSettingsFactory = deviceSettingsFactory;
         _logger = logger;
         _audioDeviceStateReader = audioDeviceStateReader;
 
-        _deviceSettingsCache = new ConcurrentDictionary<string, DeviceSettings>(_settingsManager.LoadSettings() ?? []);
-
+        _deviceSettingsCache = new ConcurrentDictionary<string, DeviceSettings>(initialSettings);
         // 設定変更の通知を受け取り、指定された時間後に保存処理を実行する
         _saveSubscription = _saveTrigger
             .Throttle(TimeSpan.FromSeconds(config.AutoSaveDelaySeconds))

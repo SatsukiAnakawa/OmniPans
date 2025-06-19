@@ -1,6 +1,7 @@
-﻿// Application/ServiceExtensions/UserSettingsServiceExtensions.cs
+// Application/ServiceExtensions/UserSettingsServiceExtensions.cs
 // ユーザー設定関連のサービスをDIコンテナに登録します。
 namespace OmniPans.Application.ServiceExtensions;
+
 public static class UserSettingsServiceExtensions
 {
     // アプリケーションのユーザー設定関連サービスを登録します。
@@ -14,13 +15,19 @@ public static class UserSettingsServiceExtensions
             ));
 
         services.AddSingleton<IUserDevicePreferencesService>(provider =>
-            new UserDevicePreferencesService(
-                provider.GetRequiredService<IDeviceSettingsManager>(),
+        {
+            var settingsManager = provider.GetRequiredService<IDeviceSettingsManager>();
+            var initialSettings = settingsManager.LoadSettings() ?? [];
+
+            return new UserDevicePreferencesService(
+                settingsManager,
                 provider.GetRequiredService<IDeviceSettingsFactory>(),
                 provider.GetRequiredService<ILogger<UserDevicePreferencesService>>(),
                 provider.GetRequiredService<IAudioDeviceStateReader>(),
-                provider.GetRequiredService<Core.Models.Configuration.BehaviorConfig>()
-            ));
+                provider.GetRequiredService<Core.Models.Configuration.BehaviorConfig>(),
+                initialSettings
+            );
+        });
 
         services.AddSingleton<IUserInteractionTracker>(provider =>
             new UserInteractionTracker(

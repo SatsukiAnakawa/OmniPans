@@ -1,4 +1,4 @@
-﻿// Presentation/Controls/InteractiveSlider/InteractiveSlider.cs
+// Presentation/Controls/InteractiveSlider/InteractiveSlider.cs
 // マウスやキーボードで操作可能なカスタムスライダーコントロールのメイン定義部分です。
 namespace OmniPans.Presentation.Controls;
 
@@ -76,16 +76,6 @@ public partial class InteractiveSlider : Control
         UpdateSliderVisuals();
         UpdateFormattedValueTextInternal();
         UpdateVisualState(false);
-    }
-
-    // 依存関係プロパティの値が変更されたときに呼び出されます。
-    protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
-    {
-        base.OnPropertyChanged(e);
-        if (e.Property == IsEnabledProperty)
-        {
-            UpdateVisualState();
-        }
     }
 
     #endregion

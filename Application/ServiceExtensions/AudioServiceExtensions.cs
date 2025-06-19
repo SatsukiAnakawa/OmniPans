@@ -1,6 +1,7 @@
-﻿// Application/ServiceExtensions/AudioServiceExtensions.cs
+// Application/ServiceExtensions/AudioServiceExtensions.cs
 // オーディオ関連のサービスをDIコンテナに登録します。
 namespace OmniPans.Application.ServiceExtensions;
+
 public static class AudioServiceExtensions
 {
     // アプリケーションのオーディオ関連サービスを登録します。
@@ -16,9 +17,9 @@ public static class AudioServiceExtensions
                 provider.GetRequiredService<ILogger<PanChangeNotifier>>(),
                 provider.GetRequiredService<ICoreAudioDeviceService>(),
                 provider.GetRequiredService<IDispatcherService>(),
+                provider.GetRequiredService<IMessenger>(),
                 provider.GetRequiredService<Core.Models.Configuration.BehaviorConfig>()
             ));
-
         services.AddSingleton<IDeviceFilter, DeviceFilter>();
         services.AddSingleton<IManagedDeviceFactory, ManagedDeviceFactory>();
 

@@ -1,7 +1,6 @@
-﻿// Infrastructure/Services/Audio/AudioDeviceMonitor.cs
+// Infrastructure/Services/Audio/AudioDeviceMonitor.cs
 // オーディオデバイスの接続状態や変更を監視し、UI表示用デバイスリストを管理します。
 namespace OmniPans.Infrastructure.Services.Audio;
-
 [SupportedOSPlatform("windows")]
 public class AudioDeviceMonitor : IAudioDeviceMonitor
 {
@@ -16,7 +15,6 @@ public class AudioDeviceMonitor : IAudioDeviceMonitor
     private readonly PanChangeNotifier _panChangeNotifier;
     private readonly ObservableCollection<IDisplayedDevice> _managedDevices = [];
     private bool _isDisposed;
-
     #endregion
 
     #region プロパティ
@@ -50,7 +48,7 @@ public class AudioDeviceMonitor : IAudioDeviceMonitor
         _coreAudioDeviceService.DeviceStateChanged += OnCoreDeviceStateChanged;
         _coreAudioDeviceService.DefaultDeviceChanged += OnCoreDefaultDeviceChanged;
 
-        _dispatcherService.Invoke(RefreshDeviceListInternal);
+        _dispatcherService.BeginInvoke(RefreshDeviceListInternal);
     }
 
     #endregion
@@ -58,11 +56,9 @@ public class AudioDeviceMonitor : IAudioDeviceMonitor
     #region Public Methods
 
     // 最新のデバイスリストに更新します。
-    public void RefreshDeviceList() => _dispatcherService.Invoke(RefreshDeviceListInternal);
-
+    public void RefreshDeviceList() => _dispatcherService.BeginInvoke(RefreshDeviceListInternal);
     // デバイスIDに基づいて、管理下のデバイスのフレンドリー名を取得します。
     public string? GetDeviceFriendlyNameById(string deviceId) => _managedDevices.FirstOrDefault(d => d.Id == deviceId)?.FriendlyName;
-
     #endregion
 
     #region Private Device Management Methods
@@ -70,38 +66,45 @@ public class AudioDeviceMonitor : IAudioDeviceMonitor
     // システムに存在するデバイスに合わせて管理下のデバイスリストを更新します。
     private void RefreshDeviceListInternal()
     {
-        _logger.LogDebug("デバイスリストの更新処理を開始...");
-        List<MMDevice> currentSystemDevices;
         try
         {
-            currentSystemDevices = _coreAudioDeviceService.GetActiveRenderDevices().ToList();
+            _logger.LogDebug("デバイスリストの更新処理を開始...");
+            List<MMDevice> currentSystemDevices;
+            try
+            {
+                currentSystemDevices = _coreAudioDeviceService.GetActiveRenderDevices().ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "アクティブなレンダリングデバイスの取得中にエラーが発生しました。");
+                return;
+            }
+
+            var displayableDevices = _deviceFilter.GetDisplayableDevices(currentSystemDevices).ToList();
+            var displayableDeviceIds = displayableDevices.Select(d => d.ID).ToHashSet();
+            var managedDeviceIds = _managedDevices.Select(d => d.Id).ToHashSet();
+
+            var deviceIdsToRemove = managedDeviceIds.Except(displayableDeviceIds).ToList();
+            foreach (var deviceId in deviceIdsToRemove)
+            {
+                RemoveDeviceInternal(deviceId);
+            }
+
+            foreach (var device in displayableDevices)
+            {
+                if (!managedDeviceIds.Contains(device.ID))
+                {
+                    AddDeviceInternal(device);
+                }
+                else
+                {
+                    device.Dispose();
+                }
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "アクティブなレンダリングデバイスの取得中にエラーが発生しました。");
-            return;
-        }
-
-        var displayableDevices = _deviceFilter.GetDisplayableDevices(currentSystemDevices).ToList();
-        var displayableDeviceIds = displayableDevices.Select(d => d.ID).ToHashSet();
-        var managedDeviceIds = _managedDevices.Select(d => d.Id).ToHashSet();
-
-        var deviceIdsToRemove = managedDeviceIds.Except(displayableDeviceIds).ToList();
-        foreach (var deviceId in deviceIdsToRemove)
-        {
-            RemoveDeviceInternal(deviceId);
-        }
-
-        foreach (var device in displayableDevices)
-        {
-            if (!managedDeviceIds.Contains(device.ID))
-            {
-                AddDeviceInternal(device);
-            }
-            else
-            {
-                device.Dispose();
-            }
+            _logger.LogCritical(ex, "デバイスリストの更新処理中に予期せぬエラーが発生しました。");
         }
     }
 
@@ -166,13 +169,11 @@ public class AudioDeviceMonitor : IAudioDeviceMonitor
 
     #region Event Handlers for CoreAudioDeviceService
 
-    private void OnCoreDeviceAdded(object? sender, string deviceId) => _dispatcherService.Invoke(() => AddDeviceInternal(deviceId));
+    private void OnCoreDeviceAdded(object? sender, string deviceId) => _dispatcherService.BeginInvoke(() => AddDeviceInternal(deviceId));
+    private void OnCoreDeviceRemoved(object? sender, string deviceId) => _dispatcherService.BeginInvoke(() => RemoveDeviceInternal(deviceId));
 
-    private void OnCoreDeviceRemoved(object? sender, string deviceId) => _dispatcherService.Invoke(() => RemoveDeviceInternal(deviceId));
-
-    private void OnCoreDeviceStateChanged(object? sender, DeviceStateChangedArgs args) => _dispatcherService.Invoke(RefreshDeviceListInternal);
-
-    private void OnCoreDefaultDeviceChanged(object? sender, DefaultDeviceChangedArgs args) => _dispatcherService.Invoke(RefreshDeviceListInternal);
+    private void OnCoreDeviceStateChanged(object? sender, DeviceStateChangedArgs args) => _dispatcherService.BeginInvoke(RefreshDeviceListInternal);
+    private void OnCoreDefaultDeviceChanged(object? sender, DefaultDeviceChangedArgs args) => _dispatcherService.BeginInvoke(RefreshDeviceListInternal);
 
     #endregion
 

@@ -1,7 +1,6 @@
-﻿// Presentation/ViewModels/TrayMenuViewModel.cs
+// Presentation/ViewModels/TrayMenuViewModel.cs
 // トレイアイコンのコンテキストメニューのロジックと状態を管理します。
 namespace OmniPans.Presentation.ViewModels;
-
 /// <summary>
 /// タスクトレイアイコンのコンテキストメニューのロジックと状態を管理します。
 /// </summary>
@@ -20,19 +19,16 @@ public partial class TrayMenuViewModel(
     /// </summary>
     [ObservableProperty]
     private bool _isStartupEnabled;
-
     /// <summary>
     /// 非表示に設定されているデバイスを表すメニュー項目のコレクションを取得または設定します。
     /// </summary>
     [ObservableProperty]
     private ObservableCollection<IMenuItemViewModel> _hiddenDeviceMenuItems = [];
-
     /// <summary>
     /// 非表示のデバイスメニュー項目が1つ以上存在するかどうかを示す値を取得または設定します。
     /// </summary>
     [ObservableProperty]
     private bool _hasHiddenDeviceItems;
-
     #endregion
 
     #region コマンド
@@ -55,6 +51,7 @@ public partial class TrayMenuViewModel(
         if (string.IsNullOrEmpty(deviceId)) return;
         userDevicePreferencesService.SetUserHiddenPreference(deviceId, false);
         audioDeviceMonitor.RefreshDeviceList();
+        LoadMenuItems();
     }
 
     /// <summary>

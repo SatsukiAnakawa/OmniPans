@@ -1,4 +1,4 @@
-﻿// Presentation/ViewModels/DeviceViewModel.cs
+// Presentation/ViewModels/DeviceViewModel.cs
 // 単一のオーディオデバイスに関するUIロジックと状態を管理します。
 namespace OmniPans.Presentation.ViewModels;
 
@@ -11,95 +11,73 @@ public partial class DeviceViewModel : ObservableObject, IDisposable,
     private readonly IAudioEndpointController _audioEndpointController;
     private readonly IUserDevicePreferencesService _userDevicePreferencesService;
     private readonly IUserInteractionTracker _userInteractionTracker;
+    private readonly IMessenger _messenger;
+    private readonly ILogger<DeviceViewModel> _logger;
+    private double _volumeBeforeMute;
+    // ミュート前の音量を記憶
     private bool _isUpdatingFromOs;
+    private bool _isTogglingPanReset; // アイコンクリックによるリセット操作中かどうかのフラグ
     private bool _isDisposed;
+
     #endregion
 
     #region プロパティ
 
-    /// <summary>
-    /// このViewModelが表現するデバイスのモデルを取得します。
-    /// </summary>
     [ObservableProperty]
     private IDisplayedDevice _device;
 
-    /// <summary>
-    /// デバイスの現在の音量 (0-100) を取得または設定します。
-    /// UIからの変更は、デバウンス処理された後、非同期でOSに適用されます。
-    /// </summary>
     [ObservableProperty]
     private double _volume;
 
-    /// <summary>
-    /// デバイスの現在のパン（左右バランス, -100-100）を取得または設定します。
-    /// UIからの変更は、デバウンス処理された後、非同期でOSに適用されます。
-    /// </summary>
     [ObservableProperty]
     private double _pan;
 
-    /// <summary>
-    /// デバイスの一意なIDを取得します。
-    /// </summary>
     public string Id => Device.Id;
-
-    /// <summary>
-    /// デバイスの表示名を取得します。
-    /// </summary>
     public string FriendlyName => Device.FriendlyName;
-
-    /// <summary>
-    /// デバイスがパンコントロールをサポートしているかどうかを示す値を取得します。
-    /// </summary>
     public bool IsPanControlAvailable => Device.CanPan;
+
     #endregion
 
     #region コンストラクタ
 
-    /// <summary>
-    /// <see cref="DeviceViewModel"/> クラスの新しいインスタンスを初期化します。
-    /// </summary>
-    /// <param name="device">関連付けるデバイスモデル。</param>
-    /// <param name="audioEndpointController">オーディオ設定を適用するためのコントローラー。</param>
-    /// <param name="userDevicePreferencesService">ユーザー設定を管理するサービス。</param>
-    /// <param name="userInteractionTracker">ユーザー操作を追跡するサービス。</param>
+    // DeviceViewModel クラスの新しいインスタンスを初期化します。
     public DeviceViewModel(
         IDisplayedDevice device,
         IAudioEndpointController audioEndpointController,
         IUserDevicePreferencesService userDevicePreferencesService,
-        IUserInteractionTracker userInteractionTracker)
+        IUserInteractionTracker userInteractionTracker,
+        IMessenger messenger,
+        ILogger<DeviceViewModel> logger)
     {
         _device = device;
         _audioEndpointController = audioEndpointController;
         _userDevicePreferencesService = userDevicePreferencesService;
         _userInteractionTracker = userInteractionTracker;
+        _messenger = messenger;
+        _logger = logger;
 
-        // OSの最新設定と同期してから値を取得する
         var settings = _userDevicePreferencesService.GetSyncedSettings(device.Id);
         _volume = settings.Volume;
         _pan = settings.Pan;
 
-        WeakReferenceMessenger.Default.Register<OsVolumeChangedMessage>(this);
-        WeakReferenceMessenger.Default.Register<OsPanChangedMessage>(this);
+        _volumeBeforeMute = Math.Abs(_volume) > double.Epsilon ? _volume : Core.Models.DeviceSettings.DefaultVolume;
+
+        _messenger.Register<OsVolumeChangedMessage>(this);
+        _messenger.Register<OsPanChangedMessage>(this);
     }
 
     #endregion
 
     #region メッセージ受信
 
-    /// <summary>
-    /// OSからの音量変更通知メッセージを受信し、UIの状態を更新します。
-    /// </summary>
-    /// <param name="message">受信したメッセージ。</param>
+    // OSからの音量変更通知メッセージを受信し、UIの状態を更新します。
     public void Receive(OsVolumeChangedMessage message)
     {
         if (_isDisposed || message.DeviceId != Id) return;
         SyncStateFromOS(message.NewVolume, Pan);
     }
 
-    /// <summary>
-    /// OSからのパン変更通知メッセージを受信し、UIの状態を更新します。
-    /// </summary>
-    /// <param name="message">受信したメッセージ。</param>
+    // OSからのパン変更通知メッセージを受信し、UIの状態を更新します。
     public void Receive(OsPanChangedMessage message)
     {
         if (_isDisposed || message.DeviceId != Id) return;
@@ -110,18 +88,67 @@ public partial class DeviceViewModel : ObservableObject, IDisposable,
 
     #region コマンド
 
-    /// <summary>
-    /// このデバイスをUI上から非表示にするよう要求します。
-    /// </summary>
+    // このデバイスをUI上から非表示にするよう要求します。
     [RelayCommand]
     private void HideDevice()
     {
-        WeakReferenceMessenger.Default.Send(new HideDeviceRequestMessage(Id));
+        _messenger.Send(new HideDeviceRequestMessage(Id));
     }
 
-    /// <summary>
-    /// UIからの音量変更をデバイスに適用し、設定を保存します。
-    /// </summary>
+    // 音量のミュート状態を切り替えます。
+    [RelayCommand]
+    private void ToggleMute()
+    {
+        if (Math.Abs(Volume) > double.Epsilon)
+        {
+            Volume = 0;
+        }
+        else
+        {
+            Volume = _volumeBeforeMute;
+        }
+    }
+
+    // パンの値をリセット（0に設定）または元の値に戻します。
+    [RelayCommand]
+    private async Task TogglePanResetAsync()
+    {
+        if (_isTogglingPanReset) return;
+
+        try
+        {
+            _isTogglingPanReset = true;
+            var currentSettings = _userDevicePreferencesService.GetDeviceSettings(Id);
+
+            if (Math.Abs(Pan) > double.Epsilon)
+            {
+                var newSettings = currentSettings with { Pan = 0, PanBeforeReset = this.Pan };
+                _userDevicePreferencesService.UpdateDeviceSetting(Id, newSettings);
+                await _audioEndpointController.ApplyPanAsync(Id, 0, default);
+                this.Pan = 0;
+            }
+            else
+            {
+                var panToRestore = currentSettings.PanBeforeReset;
+                if (Math.Abs(panToRestore) > double.Epsilon)
+                {
+                    _userDevicePreferencesService.UpdateDeviceSetting(Id, currentSettings with { Pan = panToRestore });
+                    await _audioEndpointController.ApplyPanAsync(Id, panToRestore, default);
+                    this.Pan = panToRestore;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "デバイス '{DeviceName}' (ID: {DeviceId}) のパンのリセット操作中にエラーが発生しました。", FriendlyName, Id);
+        }
+        finally
+        {
+            _isTogglingPanReset = false;
+        }
+    }
+
+    // UIからの音量変更をデバイスに適用し、設定を保存します。
     [RelayCommand]
     private async Task ApplyVolumeChangeAsync(CancellationToken cancellationToken)
     {
@@ -134,19 +161,16 @@ public partial class DeviceViewModel : ObservableObject, IDisposable,
         _userDevicePreferencesService.UpdateDeviceSetting(Id, currentSettings with { Volume = roundedVolume });
     }
 
-    /// <summary>
-    /// UIからのパン変更をデバイスに適用し、設定を保存します。
-    /// </summary>
+    // UIからのパン変更をデバイスに適用し、設定を保存します。
     [RelayCommand]
     private async Task ApplyPanChangeAsync(CancellationToken cancellationToken)
     {
         var roundedPan = (int)Math.Round(Pan);
         var currentSettings = _userDevicePreferencesService.GetDeviceSettings(Id);
-        if (roundedPan == (int)Math.Round(currentSettings.Pan)) return;
 
         _userInteractionTracker.RecordUserInteraction(Id);
         await _audioEndpointController.ApplyPanAsync(Id, roundedPan, cancellationToken).ConfigureAwait(false);
-        _userDevicePreferencesService.UpdateDeviceSetting(Id, currentSettings with { Pan = roundedPan });
+        _userDevicePreferencesService.UpdateDeviceSetting(Id, currentSettings with { Pan = roundedPan, PanBeforeReset = roundedPan });
     }
 
     #endregion
@@ -156,34 +180,40 @@ public partial class DeviceViewModel : ObservableObject, IDisposable,
     // 音量プロパティの変更を検知し、適用コマンドを実行します。
     partial void OnVolumeChanged(double value)
     {
-        if (_isUpdatingFromOs) return;
-        if (ApplyVolumeChangeCommand.IsRunning)
+        if (Math.Abs(value) > double.Epsilon)
         {
-            ApplyVolumeChangeCommand.Cancel();
+            _volumeBeforeMute = value;
         }
-        ApplyVolumeChangeCommand.Execute(null);
+
+        if (!_isUpdatingFromOs)
+        {
+            if (ApplyVolumeChangeCommand.IsRunning)
+            {
+                ApplyVolumeChangeCommand.Cancel();
+            }
+            ApplyVolumeChangeCommand.Execute(null);
+        }
     }
 
     // パンプロパティの変更を検知し、適用コマンドを実行します。
     partial void OnPanChanged(double value)
     {
-        if (_isUpdatingFromOs) return;
-        if (ApplyPanChangeCommand.IsRunning)
+        if (_isTogglingPanReset) return;
+        if (!_isUpdatingFromOs)
         {
-            ApplyPanChangeCommand.Cancel();
+            if (ApplyPanChangeCommand.IsRunning)
+            {
+                ApplyPanChangeCommand.Cancel();
+            }
+            ApplyPanChangeCommand.Execute(null);
         }
-        ApplyPanChangeCommand.Execute(null);
     }
 
     #endregion
 
     #region 公開メソッド
 
-    /// <summary>
-    /// OSから読み取った最新の状態でViewModelを安全に更新します。
-    /// </summary>
-    /// <param name="osVolume">OSから取得した最新の音量。</param>
-    /// <param name="osPan">OSから取得した最新のパン。</param>
+    // OSから読み取った最新の状態でViewModelを安全に更新します。
     public void SyncStateFromOS(double osVolume, double osPan)
     {
         try
@@ -206,6 +236,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable,
 
     #region IDisposable
 
+    // このViewModelが使用するリソースを解放します。
     public void Dispose()
     {
         Dispose(true);
@@ -219,7 +250,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable,
         {
             if (ApplyVolumeChangeCommand.IsRunning) ApplyVolumeChangeCommand.Cancel();
             if (ApplyPanChangeCommand.IsRunning) ApplyPanChangeCommand.Cancel();
-            WeakReferenceMessenger.Default.UnregisterAll(this);
+            _messenger.UnregisterAll(this);
         }
         _isDisposed = true;
     }

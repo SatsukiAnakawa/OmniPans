@@ -1,5 +1,20 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="IconButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style x:Key="DeviceControlLabelTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource Brush.Text.DeviceControlLabel}"/>
@@ -45,25 +60,31 @@
     </Style>
 
     <Style TargetType="{x:Type MenuItem}">
-        <Setter Property="Background" Value="{StaticResource Brush.ContextMenu.Background}"/>
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Grid SnapsToDevicePixels="true">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"/>
-
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="true">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition x:Name="IconColumn" Width="Auto" MinWidth="22"/>
+                                <ColumnDefinition x:Name="IconColumn" Width="Auto" SharedSizeGroup="MenuItemIconColumnGroup"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition x:Name="ArrowColumn" Width="Auto"/>
                             </Grid.ColumnDefinitions>
+
+                            <ContentPresenter x:Name="Icon"
+                                              ContentSource="Icon"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Grid.Column="0"
+                                              Margin="1"/>
 
                             <Path x:Name="CheckMark"
                                   Visibility="Collapsed"
@@ -74,13 +95,6 @@
                                   Data="M 0 5 L 4 9 M 4 9 L 11 0"
                                   VerticalAlignment="Center"
                                   HorizontalAlignment="Center"/>
-
-                            <ContentPresenter x:Name="Icon"
-                                              ContentSource="Icon"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Grid.Column="0"
-                                              Margin="1"/>
 
                             <ContentPresenter ContentSource="Header"
                                               Grid.Column="1"
@@ -108,7 +122,7 @@
                                         <Grid RenderOptions.ClearTypeHint="Enabled">
                                             <Canvas HorizontalAlignment="Left" Height="0" VerticalAlignment="Top" Width="0">
                                                 <Rectangle x:Name="OpaqueRect"
-                                                           Fill="{Binding Background, ElementName=SubmenuBorder}"
+                                                         Fill="{Binding Background, ElementName=SubmenuBorder}"
                                                            Height="{Binding ActualHeight, ElementName=SubmenuBorder}"
                                                            Width="{Binding ActualWidth, ElementName=SubmenuBorder}"/>
                                             </Canvas>
@@ -122,47 +136,39 @@
                                 </Border>
                             </Popup>
                         </Grid>
-                    </Grid>
+                    </Border>
                     <ControlTemplate.Triggers>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsHighlighted" Value="True"/>
-                                <Condition Property="IsEnabled" Value="True"/>
-                            </MultiTrigger.Conditions>
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Brush.MenuItem.Highlight}"/>
-                        </MultiTrigger>
-                        <Trigger Property="IsChecked" Value="true">
-                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
-                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter TargetName="Bd" Property="Background" Value="Transparent"/>
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="SubmenuArrow" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsSuspendingPopupAnimation" Value="true">
+                            <Setter TargetName="PART_Popup" Property="PopupAnimation" Value="None"/>
                         </Trigger>
                         <Trigger Property="Icon" Value="{x:Null}">
                             <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
                         </Trigger>
-                        <Trigger Property="HasItems" Value="true">
-                            <Setter TargetName="SubmenuArrow" Property="Visibility" Value="Visible"/>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding Path=Icon, RelativeSource={RelativeSource Self}}" Value="{x:Null}"/>
+                                <Condition Binding="{Binding Path=IsChecked, RelativeSource={RelativeSource Self}}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="IconColumn" Property="MinWidth" Value="0"/>
+                            <Setter TargetName="IconColumn" Property="Width" Value="Auto"/>
+                        </MultiDataTrigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Brush.MenuItem.Highlight}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+                            <Setter TargetName="Bd" Property="Background" Value="Transparent" />
                         </Trigger>
-
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="Icon" Value="{x:Null}"/>
-                                <Condition Property="IsCheckable" Value="False"/>
-                                <Condition Property="Tag" Value="{x:Null}"/>
-                            </MultiTrigger.Conditions>
-                            <Setter TargetName="IconColumn" Property="Width" Value="0"/>
-                            <Setter TargetName="IconColumn" Property="MinWidth" Value="0"/>
-                        </MultiTrigger>
-
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsEnabled" Value="False"/>
-                                <Condition Property="IsHighlighted" Value="True"/>
-                            </MultiTrigger.Conditions>
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Brush.ContextMenu.Background}"/>
-                        </MultiTrigger>
-
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

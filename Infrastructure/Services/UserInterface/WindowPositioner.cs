@@ -1,20 +1,13 @@
-﻿// Infrastructure/Services/UserInterface/WindowPositioner.cs
+// Infrastructure/Services/UserInterface/WindowPositioner.cs
 // ウィンドウの位置を計算し、配置する責務を持ちます。
 namespace OmniPans.Infrastructure.Services.UserInterface;
 
-/// <summary>
-/// ウィンドウの位置を計算し、配置する責務を持つ実装クラスです。
-/// </summary>
 [SupportedOSPlatform("windows")]
 public class WindowPositioner : IWindowPositioner
 {
     #region Public Methods
 
-    /// <summary>
-    /// フライアウトウィンドウをタスクバーの近く、マウスカーソルの水平位置に合わせて配置します。
-    /// </summary>
-    /// <param name="window">配置対象のウィンドウ。</param>
-    /// <returns>計算されたウィンドウの左端のX座標。</returns>
+    // フライアウトウィンドウをタスクバーの近く、マウスカーソルの水平位置に合わせて配置します。
     public double PositionFlyout(Window window)
     {
         ArgumentNullException.ThrowIfNull(window);
@@ -36,11 +29,7 @@ public class WindowPositioner : IWindowPositioner
         return targetLeft;
     }
 
-    /// <summary>
-    /// フライアウトウィンドウのY座標を、現在の高さに基づいて再計算して配置します。
-    /// </summary>
-    /// <param name="window">再配置対象のウィンドウ。</param>
-    /// <param name="currentLeft">現在のウィンドウの左端のX座標。</param>
+    // フライアウトウィンドウのY座標を、現在の高さに基づいて再計算して配置します。
     public void RepositionFlyoutY(Window window, double currentLeft)
     {
         ArgumentNullException.ThrowIfNull(window);
@@ -62,6 +51,7 @@ public class WindowPositioner : IWindowPositioner
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
     private static extern bool GetCursorPos(out Win32Point lpPoint);
+
     // 現在のマウスカーソルの位置を取得します。
     private static System.Windows.Point GetMousePosition()
     {

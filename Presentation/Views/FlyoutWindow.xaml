@@ -1,4 +1,4 @@
-﻿<Window x:Class="OmniPans.Presentation.Views.FlyoutWindow"
+<Window x:Class="OmniPans.Presentation.Views.FlyoutWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewmodels:FlyoutViewModel, IsDesignTimeCreatable=False}"
         d:DesignHeight="450" d:DesignWidth="400"
-        
+         
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" ResizeMode="NoResize" SizeToContent="WidthAndHeight"
         Topmost="True">
@@ -22,22 +22,24 @@
 
     <Border Style="{StaticResource FlyoutMainBorderStyle}">
         <Grid Background="{StaticResource Brush.Window.Background}">
-            <ItemsControl ItemsSource="{Binding DeviceViewModels}" Padding="0"
-                          HorizontalContentAlignment="Stretch"
-                          Visibility="{Binding HasVisibleDevices, Converter={StaticResource BooleanToVisibilityConverterInstance}}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel Orientation="Vertical"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type viewmodels:DeviceViewModel}">
-                        <Border BorderBrush="{StaticResource Brush.DeviceView.ItemSeparator}" BorderThickness="0,0,0,1" Margin="0">
-                            <views:DeviceView Margin="0"/>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding DeviceViewModels}" Padding="0"
+                              HorizontalContentAlignment="Stretch"
+                              Visibility="{Binding HasVisibleDevices, Converter={StaticResource BooleanToVisibilityConverterInstance}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type viewmodels:DeviceViewModel}">
+                            <Border BorderBrush="{StaticResource Brush.DeviceView.ItemSeparator}" BorderThickness="0,0,0,1" Margin="0">
+                                <views:DeviceView Margin="0"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
 
             <Border Padding="20,30" MinWidth="250"
                     Visibility="{Binding NoVisibleDevicesMessageIsVisible, Converter={StaticResource BooleanToVisibilityConverterInstance}}">

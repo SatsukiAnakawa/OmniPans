@@ -1,13 +1,19 @@
 // Application/App.xaml.cs
 // アプリケーションのエントリーポイント。ライフサイクルイベントとグローバルな例外処理を管理します。
+
+[assembly: ThemeInfo(
+    ResourceDictionaryLocation.None,
+    ResourceDictionaryLocation.SourceAssembly
+)]
+
 namespace OmniPans;
+
 public partial class App : System.Windows.Application
 {
     #region フィールド・プロパティ
 
     private System.Threading.Mutex? _mutex;
     private Bootstrapper? _bootstrapper;
-
     internal Microsoft.Extensions.Logging.ILogger? AppLogger { get; set; }
     internal IUnhandledExceptionUIService? UnhandledExceptionUIService { get; set; }
 
@@ -18,8 +24,7 @@ public partial class App : System.Windows.Application
     // アプリケーションの起動時に実行される処理です。
     protected override void OnStartup(StartupEventArgs e)
     {
-        _mutex = new System.Threading.Mutex(true, "OmniPans-SatsukiAnakawa-Mutex", out bool createdNew);
-
+        _mutex = new System.Threading.Mutex(true, AppConstants.MutexName, out bool createdNew);
         if (!createdNew)
         {
             MessageBox.Show(
@@ -27,7 +32,6 @@ public partial class App : System.Windows.Application
                 "多重起動防止",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
-
             _mutex?.Dispose();
             _mutex = null;
             Shutdown();
@@ -36,7 +40,6 @@ public partial class App : System.Windows.Application
 
         this.DispatcherUnhandledException += App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
         base.OnStartup(e);
 
         try

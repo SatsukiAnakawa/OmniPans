@@ -10,7 +10,6 @@
     <UseWPF>true</UseWPF>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <ApplicationIcon>Application\app_icon.ico</ApplicationIcon>
-    <UseWindowsForms>true</UseWindowsForms>
     <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsNamespaces>
     <Configurations>Debug;Release;Release-CI</Configurations>
   </PropertyGroup>
