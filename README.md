@@ -18,8 +18,6 @@
 * **スタートアップ登録**: PCの起動時に、アプリを自動で立ち上げるかどうかをタスクトレイメニューから簡単に設定できます。
 * **デバイスの非表示**: 普段使わないデバイスを一時的に非表示にして、リストをスッキリさせることができます。
 * **バックグラウンド動作**: フライアウトウィンドウを開いても、タスクマネージャー上では「バックグラウンドプロセス」として動作し続けます。
-* **UI仮想化によるパフォーマンス**: 多数のデバイスが接続されても、`VirtualizingStackPanel`によりUIの応答性が損なわれません。
-* **高速操作への応答性**: スライダーを素早く連続操作しても、`CancellationToken`を用いたキャンセル処理により、最新の操作がスムーズに反映されます。
 
 ### 使い方
 
@@ -54,8 +52,6 @@
 * **Startup Registration**: Easily set whether the app starts automatically on PC boot from the task tray menu.
 * **Hide Devices**: Temporarily hide devices you don't normally use to keep the list clean.
 * **Background Operation**: Even when the flyout window is open, it continues to run as a "background process" in the Task Manager.
-* **UI Virtualization for Performance**: UI responsiveness is not compromised even with many devices connected, thanks to `VirtualizingStackPanel`.
-* **Responsiveness to Fast Operations**: Even with rapid, successive slider movements, the latest operation is reflected smoothly due to cancellation handling with `CancellationToken`.
 
 ## How to Use
 
