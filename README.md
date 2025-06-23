@@ -7,6 +7,7 @@
 <p align="center">
   <strong>Latest Release （最新版）</strong>
   <br>
+  <br>
   <a href="https://github.com/SatsukiAnakawa/OmniPans/releases/latest">
     <img src="https://img.shields.io/badge/Download-Now-blue.svg?logo=github&style=for-the-badge" alt="Download">
   </a>
