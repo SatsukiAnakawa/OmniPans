@@ -5,6 +5,14 @@
 ![Image](https://github.com/user-attachments/assets/048eb8e1-6a1f-498a-ac20-95d065f40b48)
 
 [![Latest Release 最新版)](https://img.shields.io/github/v/release/SatsukiAnakawa/OmniPans)](https://github.com/SatsukiAnakawa/OmniPans/releases/latest)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/SatsukiAnakawa/OmniPans)](https://github.com/SatsukiAnakawa/OmniPans/releases/latest)
+[**最新版のダウンロードはこちらから (Download latest version here)**](https://github.com/SatsukiAnakawa/OmniPans/releases/latest)
+<p align="center">
+  <a href="https://github.com/SatsukiAnakawa/OmniPans/releases/latest">
+    <img src="https://img.shields.io/badge/Download-Now-blue.svg?logo=github&style=for-the-badge" alt="Download">
+  </a>
+</p>
+
 
 <hr>
 
