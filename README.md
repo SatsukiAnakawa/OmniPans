@@ -4,6 +4,8 @@
 
 ![Image](https://github.com/user-attachments/assets/048eb8e1-6a1f-498a-ac20-95d065f40b48)
 
+[![Latest Release 最新版)](https://img.shields.io/github/v/release/SatsukiAnakawa/OmniPans)](https://github.com/SatsukiAnakawa/OmniPans/releases/latest)
+
 <hr>
 
 <details>
