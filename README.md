@@ -2,7 +2,9 @@
 
 **A utility app that allows you to easily adjust the volume and pan (left/right balance) of all audio devices on Windows from a single location.**
 
-![Image](https://github.com/user-attachments/assets/048eb8e1-6a1f-498a-ac20-95d065f40b48)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/048eb8e1-6a1f-498a-ac20-95d065f40b48" alt="OmniPans Logo">
+</p>
 
 <p align="center">
   <strong>Latest Release （最新版）</strong>
